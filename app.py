@@ -47,7 +47,6 @@ def get_audio_duration(path):
         print("Error obteniendo duración de audio:", e)
         return None
 
-
 def format_duration(seconds):
     """
     Convierte segundos (float) en formato m:ss, 
