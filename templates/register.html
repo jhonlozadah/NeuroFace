@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+
+<style>
+  /* Fondo general del registro */
+  body {
+    background: linear-gradient(135deg, #00e0ff, #2d62ff, #8a00ff);
+    background-size: 400% 400%;
+    animation: bgMove 12s ease infinite;
+  }
+
+  @keyframes bgMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Tarjeta del formulario */
+  .register-card {
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    animation: fadeIn 0.7s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Título del formulario */
+  .register-title {
+    font-weight: 700;
+    color: #7a00ff;
+  }
+
+  /* Botón de registro */
+  .btn-register {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .btn-register:hover {
+    background: linear-gradient(90deg, #6200d3, #1a47d6);
+  }
+
+  /* Botón de captura */
+  .btn-capture {
+    background: linear-gradient(90deg, #00e0ff, #2d62ff);
+    border: none;
+    color: white;
+    font-weight: 600;
+  }
+
+  .btn-capture:hover {
+    background: linear-gradient(90deg, #00c7e5, #1a47d6);
+  }
+
+  /* Caja del video */
+  .camera-box {
+    border-radius: 15px;
+    overflow: hidden;
+    border: 3px solid #00e0ff;
+    box-shadow: 0 0 12px rgba(0, 204, 255, 0.6);
+    display: inline-block;
+  }
+
+  /* Previsualización de imagen */
+  #photoPreview {
+    border-radius: 10px;
+    margin-top: 10px;
+    max-width: 280px;
+    border: 2px solid #7a00ff;
+    box-shadow: 0 0 10px rgba(138, 0, 255, 0.4);
+  }
+
+  /* Enlace de login */
+  .login-link {
+    font-weight: bold;
+    color: #7a00ff;
+  }
+
+  .login-link:hover {
+    color: #5300b4;
+  }
+</style>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6">
+    <div class="register-card">
+
+      <!-- Logo -->
+      <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" width="110" alt="NeuroFace Logo">
+      </div>
+
+      <h3 class="text-center register-title mb-4">Registro de Usuario</h3>
+
+      <form method="POST">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Usuario *</label>
+          <input type="text" name="username" class="form-control form-control-lg" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Correo *</label>
+          <input type="email" name="email" class="form-control form-control-lg" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre completo</label>
+          <input type="text" name="full_name" class="form-control form-control-lg">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Teléfono</label>
+          <input type="text" name="phone" class="form-control form-control-lg">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Contraseña *</label>
+          <input type="password" name="password" class="form-control form-control-lg" required>
+        </div>
+
+        <!-- Cámara -->
+        <div class="mb-3 text-center">
+          <label class="form-label fw-semibold">Foto de registro *</label>
+
+          <div class="camera-box">
+            <video id="video" width="320" height="240" autoplay></video>
+          </div>
+
+          <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
+
+          <div class="mt-3">
+            <button type="button" id="capture" class="btn btn-capture btn-sm">
+              📸 Capturar foto
+            </button>
+          </div>
+
+          <div class="mt-3">
+            <img id="photoPreview" class="d-none" alt="Previsualización">
+          </div>
+
+          <input type="hidden" name="photo" id="photoInput" required>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-register btn-lg">Registrarse</button>
+        </div>
+
+      </form>
+
+      <hr>
+
+      <p class="text-center">
+        ¿Ya tienes cuenta?
+        <a href="{{ url_for('login') }}" class="login-link">Inicia sesión</a>
+      </p>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+  initCamera('video', 'canvas', 'capture', 'photoInput', 'photoPreview');
+</script>
+{% endblock %}

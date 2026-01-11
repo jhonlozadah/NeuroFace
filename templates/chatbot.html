@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}Chatbot de Psicología{% endblock %}
+{% block content %}
+
+<style>
+  /* Fondo general */
+  body {
+    background: linear-gradient(135deg, #00e0ff, #2d62ff, #8a00ff);
+    background-size: 400% 400%;
+    animation: gradientAnim 12s ease infinite;
+  }
+
+  @keyframes gradientAnim {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Tarjeta principal */
+  .chat-card {
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: none;
+    overflow: hidden;
+    animation: fadeIn 0.6s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header del chatbot */
+  .chat-header {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    border: none;
+    padding: 15px 20px;
+  }
+
+  .chat-logo {
+    width: 48px;
+    margin-right: 12px;
+  }
+
+  /* Área del chat */
+  #chat-window {
+    background: #f7faff;
+    border-radius: 15px;
+  }
+
+  /* Burbuja del usuario */
+  .user-bubble {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    color: white;
+    border-radius: 15px;
+    padding: 10px 15px;
+    max-width: 75%;
+  }
+
+  /* Burbuja del bot */
+  .bot-bubble {
+    background: white;
+    border: 2px solid #e2e6ff;
+    border-radius: 15px;
+    padding: 10px 15px;
+    max-width: 75%;
+  }
+
+  /* Mensajes de voz */
+  .voice-message {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 224, 255, 0.15);
+    padding: 8px 12px;
+    border-radius: 15px;
+    border: 2px solid rgba(0,224,255,0.3);
+    max-width: 75%;
+  }
+
+  .voice-play-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #7a00ff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 12px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .voice-duration {
+    font-size: 12px;
+    font-weight: bold;
+    color: #2d62ff;
+    margin-left: auto;
+    margin-right: 8px;
+  }
+
+  .voice-time {
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* Input del usuario */
+  .chat-input {
+    border-radius: 12px;
+    border: 2px solid #d9dfff;
+  }
+
+  /* Botón enviar */
+  .btn-send {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+  }
+
+  /* Botón grabar audio */
+  .btn-record {
+    background: #ffcc00;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+  }
+
+</style>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8">
+
+    <div class="card chat-card shadow">
+
+      <!-- HEADER -->
+      <div class="card-header chat-header text-white d-flex align-items-center">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="chat-logo">
+
+        <div>
+          <h5 class="mb-0">Asistente de Psicología</h5>
+          <small>Escucha, contiene y orienta emocionalmente</small>
+        </div>
+
+        <div class="ms-auto small">
+          👤 {{ username }}
+        </div>
+      </div>
+
+      <!-- CHAT WINDOW -->
+      <div class="card-body" style="height: 65vh; display: flex; flex-direction: column;">
+
+        <div id="chat-window" class="mb-3 flex-grow-1 p-3 overflow-auto">
+
+          {% if chat_history %}
+            {% for msg in chat_history %}
+
+            {% if msg.sender == 'user' %}
+              <div class="d-flex justify-content-end mb-3">
+
+                {% if msg.type == 'audio' %}
+                <div class="voice-message">
+                  <div class="voice-play-btn" onclick="playVoice('{{ msg.audio_url }}', this)">▶</div>
+                  <div class="voice-duration">{{ msg.duration }}</div>
+                  <div class="voice-time">{{ msg.time }}</div>
+                </div>
+
+                {% else %}
+                <div class="user-bubble">
+                  <div class="small fw-bold text-end">Tú</div>
+                  {{ msg.text }}
+                </div>
+                {% endif %}
+
+              </div>
+
+            {% else %}
+              <div class="d-flex justify-content-start mb-3">
+
+                {% if msg.type == 'audio' %}
+                <div class="voice-message">
+                  <div class="voice-play-btn" onclick="playVoice('{{ msg.audio_url }}', this)">▶</div>
+                  <div class="voice-duration">{{ msg.duration }}</div>
+                  <div class="voice-time">{{ msg.time }}</div>
+                </div>
+
+                {% else %}
+                <div class="bot-bubble">
+                  <div class="fw-bold mb-1">Asistente</div>
+                  <div class="bot-text">{{ msg.text|safe }}</div>
+                </div>
+                {% endif %}
+
+              </div>
+            {% endif %}
+
+            {% endfor %}
+          {% else %}
+            <div class="text-center text-muted small">
+              Inicia la conversación hablando sobre emociones, ansiedad, estrés o lo que necesites 💜
+            </div>
+          {% endif %}
+
+        </div>
+
+        <!-- INPUT -->
+        <form method="POST" id="chat-form">
+          <div class="input-group">
+
+            <textarea name="message" id="message-input" rows="1"
+              class="form-control chat-input"
+              placeholder="Escribe o envía un audio…"></textarea>
+
+            <button type="button" id="record-btn" class="btn btn-record">🎤</button>
+            <button type="submit" class="btn btn-send">Enviar</button>
+
+          </div>
+
+          <div id="mic-status" class="form-text text-muted small mt-1">
+            Mantén presionado el botón para grabar audio.
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- CONFIG SPEAK -->
+<div id="chatbot-config" data-speak="{{ 'true' if speak_last else 'false' }}"></div>
+
+<script>
+  const chatWindow = document.getElementById("chat-window");
+  if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  const messageInput = document.getElementById("message-input");
+  const chatForm = document.getElementById("chat-form");
+
+  messageInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      chatForm.submit();
+    }
+  });
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-ES";
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
+
+  window.onload = () => {
+    const msgs = document.querySelectorAll(".bot-text");
+    if (msgs.length > 0) {
+      const last = msgs[msgs.length - 1].innerText;
+      if (document.getElementById("chatbot-config").dataset.speak === "true") {
+        speak(last);
+      }
+    }
+  };
+</script>
+
+<script>
+  let mediaRecorder, audioChunks = [], recording = false;
+  const recordBtn = document.getElementById("record-btn");
+
+  recordBtn.addEventListener("mousedown", startRecording);
+  recordBtn.addEventListener("touchstart", startRecording);
+  recordBtn.addEventListener("mouseup", stopRecording);
+  recordBtn.addEventListener("mouseleave", stopRecording);
+  recordBtn.addEventListener("touchend", stopRecording);
+
+  function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.start();
+      recording = true;
+      recordBtn.classList.add("btn-danger");
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    });
+  }
+
+  function stopRecording() {
+    if (!recording) return;
+    recording = false;
+    recordBtn.classList.remove("btn-danger");
+    mediaRecorder.stop();
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: "audio/webm" });
+      const fd = new FormData();
+      fd.append("audio", blob);
+      fetch("/chatbot?audio=1", { method: "POST", body: fd })
+        .then(() => location.reload());
+    };
+  }
+
+  let currentAudio = null;
+  function playVoice(url, btn) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    const audio = new Audio(url);
+    currentAudio = audio;
+    audio.play();
+    btn.textContent = "⏸";
+    audio.onended = () => btn.textContent = "▶";
+  }
+</script>
+
+{% endblock %}

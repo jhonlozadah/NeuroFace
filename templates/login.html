@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<style>
+  /* Fondo general con los colores del logo */
+  body {
+    background: linear-gradient(135deg, #00e0ff, #2d62ff, #8a00ff);
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Tarjeta principal */
+  .login-card {
+    border-radius: 20px;
+    border: none;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.88);
+    animation: fadeIn 0.8s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Título del login */
+  .login-title {
+    font-weight: 700;
+    color: #7a00ff;
+  }
+
+  /* Botón principal */
+  .btn-login {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    border: none;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-login:hover {
+    background: linear-gradient(90deg, #6200d3, #1a47d6);
+  }
+
+  .face-box {
+    border: 3px solid transparent;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    display: inline-block;
+    box-shadow: 0 0 12px rgba(0, 204, 255, 0.5);
+  }
+
+  .face-title {
+    color: #006eff;
+    font-weight: 600;
+  }
+
+  /* Enlace de registro */
+  .register-link {
+    color: #7a00ff;
+    font-weight: bold;
+  }
+
+  .register-link:hover {
+    color: #5300b4;
+  }
+</style>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6">
+
+    <div class="card login-card shadow-lg p-4">
+
+      <!-- LOGO CENTRADO -->
+      <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo" width="110">
+      </div>
+
+      <h3 class="text-center login-title mb-4">Iniciar Sesión</h3>
+
+      <!-- Login clásico -->
+      <form method="POST" class="mb-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Usuario o correo</label>
+          <input type="text" name="username_or_email" class="form-control form-control-lg" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Contraseña</label>
+          <input type="password" name="password" class="form-control form-control-lg" />
+        </div>
+
+        <div class="d-grid mb-2">
+          <button type="submit" class="btn btn-login btn-lg text-white">Iniciar sesión</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <!-- Reconocimiento facial -->
+      <h5 class="text-center face-title mb-2">Reconocimiento Facial Automático</h5>
+      <p class="text-muted text-center small">
+        Colócate frente a la cámara. Se intentará reconocerte automáticamente.
+      </p>
+
+      <div class="text-center">
+        <div class="face-box">
+          <video id="videoLogin" width="260" height="200" autoplay></video>
+        </div>
+        <canvas id="canvasLogin" width="320" height="240" class="d-none"></canvas>
+      </div>
+
+      <div id="faceLoginMsg"
+           class="mt-3 text-center text-secondary small fw-semibold">
+        Inicializando cámara...
+      </div>
+
+      <hr>
+
+      <!-- Registro -->
+      <p class="text-center">
+        ¿No tienes cuenta?
+        <a href="{{ url_for('register') }}" class="register-link">Regístrate</a>
+      </p>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+  // Iniciar cámara
+  initCamera('videoLogin', 'canvasLogin', null, null, null);
+
+  const videoLogin = document.getElementById('videoLogin');
+  const canvasLogin = document.getElementById('canvasLogin');
+  const faceLoginMsg = document.getElementById('faceLoginMsg');
+
+  let isTryingFaceLogin = false;
+  let attempts = 0;
+  const MAX_ATTEMPTS = 10;
+  const INTERVAL_MS = 3000;
+
+  async function tryFaceLogin() {
+    if (isTryingFaceLogin) return;
+    if (attempts >= MAX_ATTEMPTS) {
+      faceLoginMsg.textContent = "No se pudo reconocer el rostro. Usa usuario y contraseña.";
+      faceLoginMsg.className = "mt-3 text-center text-danger small fw-semibold";
+      return;
+    }
+
+    if (!videoLogin.videoWidth || !videoLogin.videoHeight) {
+      faceLoginMsg.textContent = "Esperando cámara...";
+      return;
+    }
+
+    isTryingFaceLogin = true;
+    attempts++;
+
+    const ctx = canvasLogin.getContext('2d');
+    const width = videoLogin.videoWidth;
+    const height = videoLogin.videoHeight;
+
+    canvasLogin.width = width;
+    canvasLogin.height = height;
+    ctx.drawImage(videoLogin, 0, 0, width, height);
+
+    const dataUrl = canvasLogin.toDataURL('image/jpeg', 0.7);
+
+    faceLoginMsg.textContent = `Escaneando rostro... (${attempts}/${MAX_ATTEMPTS})`;
+
+    const formData = new FormData();
+    formData.append('photo', dataUrl);
+
+    try {
+      const response = await fetch('{{ url_for("face_login") }}', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        faceLoginMsg.textContent = result.message;
+        faceLoginMsg.className = "mt-3 text-center text-success small fw-semibold";
+        window.location.href = "{{ url_for('index') }}";
+        return;
+      } else {
+        faceLoginMsg.textContent = result.message + ` (${attempts}/${MAX_ATTEMPTS})`;
+      }
+
+    } catch (e) {
+      faceLoginMsg.textContent = "Error al conectar con el servidor.";
+    } finally {
+      isTryingFaceLogin = false;
+    }
+  }
+
+  setInterval(tryFaceLogin, INTERVAL_MS);
+</script>
+
+{% endblock %}

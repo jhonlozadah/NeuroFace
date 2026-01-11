@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+<style>
+  body {
+    background: linear-gradient(135deg, #00e0ff, #2d62ff, #8a00ff);
+    background-size: 400% 400%;
+    animation: gradientAnim 12s ease infinite;
+  }
+
+  @keyframes gradientAnim {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Tarjeta principal de bienvenida */
+  .welcome-card {
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    animation: fadeIn 0.7s ease;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .welcome-title {
+    font-weight: 700;
+    color: #7a00ff;
+  }
+
+  /* Tarjetas de opciones */
+  .option-card {
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: none;
+  }
+
+  .option-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+  }
+
+  .icon-circle {
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Botón Chatbot */
+  .btn-chatbot {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    border: none;
+  }
+
+  .btn-chatbot:hover {
+    background: linear-gradient(90deg, #6200d3, #1a47d6);
+  }
+
+  /* Botón emociones */
+  .btn-emotion {
+    background: transparent;
+    border: 2px solid #ffcc00;
+    color: #ffcc00;
+    font-weight: bold;
+    border-radius: 10px;
+  }
+
+  .btn-emotion:hover {
+    background: #ffcc00;
+    color: black;
+  }
+
+  /* Logo */
+  .logo-img {
+    width: 120px;
+    margin-bottom: 10px;
+  }
+
+</style>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-8 text-center">
+    <!-- Logo -->
+    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo-img" alt="NeuroFace Logo">
+
+    <div class="welcome-card shadow">
+      <h3 class="welcome-title">Bienvenido, {{ username }}</h3>
+      <p class="text-muted">
+        Has iniciado sesión correctamente
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+
+  <!-- Tarjeta Chatbot -->
+  <div class="col-md-4 mb-4">
+    <div class="card option-card h-100 shadow-sm">
+      <div class="card-body d-flex flex-column">
+
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-circle" style="background:#7a00ff; color:white;">
+            💬
+          </div>
+          <div class="ms-3">
+            <h5 class="mb-0">Asistente Chatbot</h5>
+            <small class="text-muted">Psicología y bienestar</small>
+          </div>
+        </div>
+
+        <p class="flex-grow-1">
+          Conversa con un asistente especializado que te acompaña en temas emocionales,
+          bienestar personal, ansiedad, estrés y más.
+        </p>
+
+        <div class="mt-3">
+          <a href="{{ url_for('chatbot') }}" class="btn btn-chatbot w-100">
+            Ir al chatbot
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta Detector emociones -->
+  <div class="col-md-4 mb-4">
+    <div class="card option-card h-100 shadow-sm">
+      <div class="card-body d-flex flex-column">
+
+        <div class="d-flex align-items-center mb-3">
+          <div class="icon-circle" style="background:#00e0ff; color:black;">
+            😊
+          </div>
+          <div class="ms-3">
+            <h5 class="mb-0">Detector de emociones</h5>
+            <small class="text-muted">Basado en Face++</small>
+          </div>
+        </div>
+
+        <p class="flex-grow-1">
+          Analiza tus emociones en tiempo real mediante tu cámara y obtén una lectura emocional
+          basada en inteligencia artificial.
+        </p>
+
+        <ul class="small text-muted mb-3">
+          <li>Lectura de emociones desde tu rostro</li>
+          <li>Análisis en tiempo real</li>
+          <li>Resultados visuales amigables</li>
+        </ul>
+
+        <div class="mt-auto">
+          <a href="{{ url_for('emociones') }}" class="btn btn-emotion w-100">
+            Ir al detector de emociones
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

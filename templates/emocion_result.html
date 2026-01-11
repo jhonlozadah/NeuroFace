@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Tu emoción y reflexión{% endblock %}
+
+{% block content %}
+
+<style>
+  /* Fondo general tipo NeuroFace */
+  body {
+    background: linear-gradient(135deg, #00e0ff, #2d62ff, #8a00ff);
+    background-size: 400% 400%;
+    animation: gradientFlow 12s ease infinite;
+  }
+
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Tarjeta glassmorphism */
+  .emotion-result-card {
+    background: rgba(255, 255, 255, 0.90);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: none;
+    overflow: hidden;
+    animation: fadeIn 0.7s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header */
+  .emotion-header {
+    background: linear-gradient(90deg, #7a00ff, #2d62ff);
+    color: white;
+    padding: 15px 20px;
+  }
+
+  .emotion-header small {
+    color: #e6e6e6 !important;
+  }
+
+  .logo-mini {
+    width: 45px;
+    margin-right: 10px;
+  }
+
+  /* Imagen */
+  .emotion-image {
+    border-radius: 12px;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.25);
+  }
+
+  /* Historia */
+  .story-box {
+    background: rgba(255,255,255,0.85);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.10);
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+  }
+
+  hr {
+    border-top: 1px solid #d9d9d9;
+  }
+</style>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-md-10">
+
+    <div class="card emotion-result-card shadow-lg">
+
+      <!-- HEADER -->
+      <div class="emotion-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo-mini">
+          <div>
+            <h5 class="mb-0 text-capitalize">
+              Emoción detectada: {{ emotion_label }}
+            </h5>
+            <small>{{ emotion_desc }}</small>
+          </div>
+        </div>
+
+        <div class="small fw-bold">
+          👤 {{ username }}
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="card-body row">
+
+        <!-- IMAGEN -->
+        <div class="col-md-5 text-center mb-3 mb-md-0">
+          {% if image_data_url %}
+            <img src="{{ image_data_url }}"
+                 alt="Imagen generada por IA"
+                 class="img-fluid emotion-image">
+          {% else %}
+            <div class="border rounded p-4 text-muted small">
+              No se pudo generar la imagen en este momento.
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- HISTORIA -->
+        <div class="col-md-7">
+          <h6 class="fw-bold mb-2" style="color:#7a00ff;">
+            Historia y reflexión para ti
+          </h6>
+
+          <div class="story-box">
+            {{ story_text }}
+          </div>
+
+          <hr />
+
+          <p class="small text-muted mb-0">
+            Esta historia se basa en la emoción estimada con tu rostro utilizando IA.
+            No reemplaza terapia profesional, pero puede ser un punto de partida para mirarte con más cariño 💛
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
