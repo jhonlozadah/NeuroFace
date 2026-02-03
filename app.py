@@ -6,12 +6,12 @@ import subprocess
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
-import sqlite3
+import sqlite3 
 import base64
 import requests
 
 app = Flask(__name__)
-app.secret_key = "CAMBIA_ESTO_POR_ALGO_SEGURO"
+app.secret_key = "Clave_API"
 
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  
 
@@ -54,7 +54,7 @@ def format_duration(seconds):
     """
     if seconds is None:
         return "0:00"
-    total = int(round(seconds))
+    total = int(round(seconds))  
     m, s = divmod(total, 60)
     return f"{m}:{s:02d}"
 
